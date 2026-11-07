@@ -6,6 +6,7 @@ import { TopBar } from './components/navigation/TopBar'
 import { Button } from './components/ui/Button'
 import { StatusBadge } from './components/ui/StatusBadge'
 import { DocumentsPage } from './features/documents/DocumentsPage'
+import { LandingPage } from './features/landing/LandingPage'
 
 interface User { id: string; email: string; firstName: string; lastName: string }
 interface Workspace { id: string; name: string; workspaceType: 'PERSONAL' | 'BUSINESS' | 'ACCOUNTANT'; defaultCurrency: string; role: string }
@@ -35,6 +36,22 @@ export function App() {
   const [error, setError] = useState('')
   const [workspaceName, setWorkspaceName] = useState('')
   const [section, setSection] = useState(() => window.location.hash.replace('#', '') || 'overview')
+  const [pathname, setPathname] = useState(() => window.location.pathname)
+
+  const navigate = (path: string) => {
+    window.history.pushState({}, '', path)
+    setPathname(path)
+  }
+
+  useEffect(() => {
+    if (token && (pathname === '/' || pathname === '/login' || pathname === '/register')) navigate('/app')
+  }, [token, pathname])
+
+  useEffect(() => {
+    const handlePopState = () => setPathname(window.location.pathname)
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
 
   useEffect(() => {
     const handleHash = () => setSection(window.location.hash.replace('#', '') || 'overview')
@@ -62,6 +79,7 @@ export function App() {
     localStorage.setItem('manageInvoiceToken', response.accessToken)
     setToken(response.accessToken)
     setUser(response.user)
+    navigate('/app')
   }
 
   const logout = () => {
@@ -71,6 +89,7 @@ export function App() {
     setUser(null)
     setWorkspaces([])
     selectWorkspace(null)
+    navigate('/')
   }
 
   const createWorkspace = async (event: FormEvent<HTMLFormElement>) => {
@@ -86,7 +105,8 @@ export function App() {
     }
   }
 
-  if (!token) return <AuthScreen api={api} onAuthenticated={authenticated} />
+  if (!token && pathname !== '/login' && pathname !== '/register') return <LandingPage onNavigate={navigate} />
+  if (!token) return <AuthScreen api={api} onAuthenticated={authenticated} initialMode={pathname === '/register' ? 'register' : 'login'} onNavigate={navigate} />
 
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Account'
 

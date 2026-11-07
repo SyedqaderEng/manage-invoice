@@ -9,10 +9,12 @@ interface AuthResponse { accessToken: string; user: User }
 interface AuthScreenProps {
   onAuthenticated: (response: AuthResponse) => void
   api: <T>(path: string, options?: RequestInit, token?: string) => Promise<T>
+  initialMode: 'login' | 'register'
+  onNavigate: (path: string) => void
 }
 
-export function AuthScreen({ onAuthenticated, api }: AuthScreenProps) {
-  const [mode, setMode] = useState<'login' | 'register'>('login')
+export function AuthScreen({ onAuthenticated, api, initialMode, onNavigate }: AuthScreenProps) {
+  const [mode, setMode] = useState<'login' | 'register'>(initialMode)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -37,7 +39,7 @@ export function AuthScreen({ onAuthenticated, api }: AuthScreenProps) {
   return (
     <main className="auth-layout">
       <section className="auth-brand-panel">
-        <div><span className="brand-mark light">M</span><strong>Manage Invoice</strong></div>
+        <button className="auth-brand" type="button" onClick={() => onNavigate('/')}><span className="brand-mark light">M</span><strong>Manage Invoice</strong></button>
         <blockquote>Document intelligence for clearer financial decisions.</blockquote>
       </section>
       <section className="auth-panel">
