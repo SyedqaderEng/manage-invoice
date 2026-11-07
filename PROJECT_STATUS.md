@@ -105,3 +105,10 @@ Financial record management implementation is complete in this development slice
 - Currency and overpayment validation for payments.
 - Financial management frontend tables and workspace creation controls.
 - Nine backend tests and frontend production build pass.
+- Expense detail/update/delete and invoice detail/update/delete completed.
+- Vendor/category update/archive and duplicate vendor detection completed.
+- Invoice duplicate detection, payment balance, overpayment, and tenant isolation completed.
+- Approved receipts and invoices create matching records exactly once.
+- Explicit invoice/receipt document relationships are available through REST.
+- PostgreSQL migrations V1-V8 and Hibernate validation pass.
+- Ten backend tests and frontend production build pass.

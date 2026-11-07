@@ -7,6 +7,9 @@ import com.manageinvoice.common.security.AuthenticatedUser;
 public class InvoiceController {
  private final InvoiceService service; public InvoiceController(InvoiceService service){this.service=service;}
  @GetMapping public Page<Invoice> list(@AuthenticationPrincipal AuthenticatedUser user,@RequestHeader("X-Workspace-Id") UUID workspaceId,Pageable pageable){return service.list(workspaceId,user.id(),pageable);}
+ @GetMapping("/{invoiceId}") public Invoice get(@AuthenticationPrincipal AuthenticatedUser user,@RequestHeader("X-Workspace-Id") UUID workspaceId,@PathVariable UUID invoiceId){return service.get(workspaceId,user.id(),invoiceId);}
+ @PutMapping("/{invoiceId}") public Invoice update(@AuthenticationPrincipal AuthenticatedUser user,@RequestHeader("X-Workspace-Id") UUID workspaceId,@PathVariable UUID invoiceId,@RequestBody InvoiceService.CreateRequest request){return service.update(workspaceId,user.id(),invoiceId,request);}
+ @DeleteMapping("/{invoiceId}") public org.springframework.http.ResponseEntity<Void> delete(@AuthenticationPrincipal AuthenticatedUser user,@RequestHeader("X-Workspace-Id") UUID workspaceId,@PathVariable UUID invoiceId){service.delete(workspaceId,user.id(),invoiceId);return org.springframework.http.ResponseEntity.noContent().build();}
  @PostMapping public Invoice create(@AuthenticationPrincipal AuthenticatedUser user,@RequestHeader("X-Workspace-Id") UUID workspaceId,@RequestBody InvoiceService.CreateRequest request){return service.create(workspaceId,user.id(),request);}
  @PostMapping("/{invoiceId}/payments") public Payment addPayment(@AuthenticationPrincipal AuthenticatedUser user,@RequestHeader("X-Workspace-Id") UUID workspaceId,@PathVariable UUID invoiceId,@RequestBody InvoiceService.PaymentRequest request){return service.addPayment(workspaceId,user.id(),invoiceId,request);}
 }

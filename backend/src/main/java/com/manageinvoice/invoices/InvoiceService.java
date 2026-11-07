@@ -26,6 +26,7 @@ public class InvoiceService {
     @Transactional
     public Invoice create(UUID workspaceId, UUID userId, CreateRequest request){
         workspaces.requireMembership(workspaceId,userId);
+        if(request.vendorId()!=null && invoices.existsByWorkspaceIdAndVendorIdAndInvoiceNumber(workspaceId,request.vendorId(),request.invoiceNumber().trim())) throw new ResponseStatusException(HttpStatus.CONFLICT,"Invoice number already exists for this vendor");
         if(request.totalAmount().compareTo(BigDecimal.ZERO)<0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invoice total cannot be negative");
         BigDecimal tax=request.taxAmount()==null?BigDecimal.ZERO:request.taxAmount();
         Invoice invoice=new Invoice(); invoice.setWorkspaceId(workspaceId); invoice.setDocumentId(request.documentId()); invoice.setVendorId(request.vendorId());
@@ -34,6 +35,12 @@ public class InvoiceService {
         invoice.setBalanceDue(request.totalAmount()); invoice.setCurrency(request.currency().toUpperCase()); invoice.setStatus("RECEIVED");
         return invoices.save(invoice);
     }
+
+    public Invoice get(UUID workspaceId, UUID userId, UUID invoiceId){workspaces.requireMembership(workspaceId,userId);return invoices.findByWorkspaceIdAndId(workspaceId,invoiceId).orElseThrow();}
+
+    @Transactional public Invoice update(UUID workspaceId, UUID userId, UUID invoiceId, CreateRequest request){Invoice invoice=get(workspaceId,userId,invoiceId);if(request.vendorId()!=null && invoices.existsByWorkspaceIdAndVendorIdAndInvoiceNumber(workspaceId,request.vendorId(),request.invoiceNumber().trim())&&(!request.vendorId().equals(invoice.getVendorId()) || !request.invoiceNumber().trim().equals(invoice.getInvoiceNumber()))) throw new ResponseStatusException(HttpStatus.CONFLICT,"Invoice number already exists for this vendor");invoice.setInvoiceNumber(request.invoiceNumber().trim());invoice.setInvoiceDate(request.invoiceDate());invoice.setDueDate(request.dueDate());invoice.setSubtotal(request.subtotal());invoice.setTaxAmount(request.taxAmount()==null?BigDecimal.ZERO:request.taxAmount());invoice.setTotalAmount(request.totalAmount());invoice.setBalanceDue(request.totalAmount().subtract(invoice.getAmountPaid()));invoice.setCurrency(request.currency().toUpperCase());return invoices.save(invoice);}
+
+    public void delete(UUID workspaceId, UUID userId, UUID invoiceId){Invoice invoice=get(workspaceId,userId,invoiceId);if(invoice.getAmountPaid().compareTo(BigDecimal.ZERO)>0) throw new ResponseStatusException(HttpStatus.CONFLICT,"Paid invoices cannot be deleted");invoices.delete(invoice);}
 
     @Transactional
     public Payment addPayment(UUID workspaceId, UUID userId, UUID invoiceId, PaymentRequest request){

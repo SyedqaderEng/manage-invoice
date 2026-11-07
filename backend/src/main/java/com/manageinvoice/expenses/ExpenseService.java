@@ -21,6 +21,8 @@ public class ExpenseService {
         expense.setCurrency(request.currency()); expense.setPaymentStatus("UNPAID"); expense.setExpenseStatus("APPROVED"); expense.setSourceType(request.documentId()==null?"MANUAL":"DOCUMENT"); expense.setCreatedBy(userId);
         return expenses.save(expense);
     }
+    public ExpenseTransaction get(UUID workspaceId, UUID userId, UUID id){ workspaces.requireMembership(workspaceId,userId); return expenses.findByWorkspaceIdAndId(workspaceId,id).orElseThrow(); }
+    @Transactional public ExpenseTransaction update(UUID workspaceId, UUID userId, UUID id, CreateRequest request){ ExpenseTransaction expense=get(workspaceId,userId,id); if(request.amount().compareTo(BigDecimal.ZERO)<0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Amount cannot be negative"); expense.setDocumentId(request.documentId()); expense.setVendorId(request.vendorId()); expense.setCategoryId(request.categoryId()); expense.setDescription(request.description()); expense.setTransactionDate(request.transactionDate()); expense.setAmount(request.amount()); expense.setTaxAmount(request.taxAmount()); expense.setCurrency(request.currency().toUpperCase()); return expenses.save(expense); }
     public void delete(UUID workspaceId, UUID userId, UUID id){ workspaces.requireMembership(workspaceId,userId); ExpenseTransaction expense=expenses.findByWorkspaceIdAndId(workspaceId,id).orElseThrow(); expenses.delete(expense); }
     public record CreateRequest(UUID documentId, UUID vendorId, UUID categoryId, String description, LocalDate transactionDate, BigDecimal amount, BigDecimal taxAmount, String currency) {}
 }

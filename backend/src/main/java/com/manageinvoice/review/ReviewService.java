@@ -16,6 +16,8 @@ import com.manageinvoice.documents.DocumentStatus;
 import com.manageinvoice.extraction.DocumentExtraction;
 import com.manageinvoice.extraction.DocumentExtractionRepository;
 import com.manageinvoice.identity.UserRepository;
+import com.manageinvoice.expenses.DocumentExpenseCreationService;
+import com.manageinvoice.invoices.DocumentInvoiceCreationService;
 import com.manageinvoice.tenancy.WorkspaceMember;
 import com.manageinvoice.tenancy.WorkspaceMemberRepository;
 import com.manageinvoice.tenancy.WorkspaceRole;
@@ -29,16 +31,21 @@ public class ReviewService {
     private final WorkspaceMemberRepository members;
     private final UserRepository users;
     private final ObjectMapper objectMapper;
+    private final DocumentExpenseCreationService expenseCreation;
+    private final DocumentInvoiceCreationService invoiceCreation;
 
     public ReviewService(DocumentRepository documents, DocumentExtractionRepository extractions,
                          DocumentReviewRepository reviews, WorkspaceMemberRepository members,
-                         UserRepository users, ObjectMapper objectMapper) {
+                         UserRepository users, ObjectMapper objectMapper,
+                         DocumentExpenseCreationService expenseCreation, DocumentInvoiceCreationService invoiceCreation) {
         this.documents = documents;
         this.extractions = extractions;
         this.reviews = reviews;
         this.members = members;
         this.users = users;
         this.objectMapper = objectMapper;
+        this.expenseCreation = expenseCreation;
+        this.invoiceCreation = invoiceCreation;
     }
 
     public ReviewState get(UUID workspaceId, UUID userId, UUID documentId) {
@@ -63,6 +70,14 @@ public class ReviewService {
         reviews.save(review);
         document.setProcessingStatus(DocumentStatus.APPROVED);
         documents.save(document);
+        try {
+            JsonNode corrected = objectMapper.readTree(correctedJson);
+            String documentType = corrected.path("documentType").asText("");
+            if ("RECEIPT".equalsIgnoreCase(documentType)) expenseCreation.createReceipt(workspaceId, userId, documentId, correctedJson);
+            if ("INVOICE".equalsIgnoreCase(documentType)) invoiceCreation.createInvoice(workspaceId, documentId, correctedJson);
+        } catch (Exception exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Approved data could not create the matching financial record", exception);
+        }
         return new ReviewState(document.getId(), document.getProcessingStatus(), extraction.getNormalizedDataJson(), correctedJson);
     }
 

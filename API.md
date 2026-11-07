@@ -70,4 +70,10 @@ Review actions preserve original extraction data separately from corrections. Ap
 
 All endpoints require authentication and `X-Workspace-Id`. Invoice payment totals are recalculated server-side, payment currency must match the invoice currency, and payments cannot exceed the invoice total.
 
+Invoice, vendor, category, and expense detail/update/delete routes are workspace-scoped. Duplicate vendor names and invoice/vendor number pairs are rejected within the workspace.
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET/POST | `/api/v1/document-relationships` | List or explicitly create document relationships |
+
 Domain controllers must delegate business operations to backend services. The React application must treat these endpoints as its server contract.
