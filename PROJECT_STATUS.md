@@ -90,4 +90,6 @@ Human review implementation is complete in this development slice:
 - Viewer read-only protection.
 - Side-by-side review workspace UI.
 - Approval does not silently create Phase 6 financial records.
-- Backend suite and frontend production build pass.
+- Authorized source-document preview loads through the secured download API.
+- Integration tests cover save, approve, audit history, and viewer denial.
+- Seven backend tests and the frontend production build pass.

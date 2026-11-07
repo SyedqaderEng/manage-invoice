@@ -56,11 +56,14 @@ public class ReviewService {
     @Transactional
     public ReviewState approve(UUID workspaceId, UUID userId, UUID documentId, Map<String, Object> correctedData, String notes) {
         requireRole(workspaceId, userId, WorkspaceRole.ADMIN, true);
-        ReviewState state = record(workspaceId, userId, documentId, correctedData, notes, ReviewStatus.APPROVED);
         Document document = requireDocument(workspaceId, userId, documentId);
+        DocumentExtraction extraction = requireExtraction(workspaceId, documentId);
+        String correctedJson = serializeCorrected(correctedData);
+        DocumentReview review = createReview(workspaceId, userId, documentId, correctedJson, notes, ReviewStatus.APPROVED);
+        reviews.save(review);
         document.setProcessingStatus(DocumentStatus.APPROVED);
         documents.save(document);
-        return state;
+        return new ReviewState(document.getId(), document.getProcessingStatus(), extraction.getNormalizedDataJson(), correctedJson);
     }
 
     @Transactional
@@ -88,6 +91,21 @@ public class ReviewService {
             reviews.save(review);
             Document document = requireDocument(workspaceId, userId, documentId);
             return new ReviewState(document.getId(), document.getProcessingStatus(), extraction.getNormalizedDataJson(), correctedJson);
+        } catch (ResponseStatusException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid corrected extraction", exception);
+        }
+    }
+
+    private String serializeCorrected(Map<String, Object> correctedData) {
+        try {
+            String correctedJson = objectMapper.writeValueAsString(correctedData);
+            JsonNode corrected = objectMapper.readTree(correctedJson);
+            if (correctedData.isEmpty() || corrected.get("total") == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Corrected extraction must include a total");
+            }
+            return correctedJson;
         } catch (ResponseStatusException exception) {
             throw exception;
         } catch (Exception exception) {

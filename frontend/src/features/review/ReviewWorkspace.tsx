@@ -22,6 +22,8 @@ export function ReviewWorkspace({ documentId, workspaceId, token, api }: ReviewW
   const [fields, setFields] = useState<Record<string, string>>({})
   const [notes, setNotes] = useState('')
   const [error, setError] = useState('')
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [previewType, setPreviewType] = useState('')
 
   const headers = () => ({ 'Content-Type': 'application/json', 'X-Workspace-Id': workspaceId || '' })
 
@@ -38,6 +40,23 @@ export function ReviewWorkspace({ documentId, workspaceId, token, api }: ReviewW
   }
 
   useEffect(() => { load() }, [documentId, workspaceId, token])
+
+  useEffect(() => {
+    if (!workspaceId || !documentId) return
+    let objectUrl: string | null = null
+    fetch(`/api/v1/documents/${documentId}/download`, { headers: { Authorization: `Bearer ${token}`, 'X-Workspace-Id': workspaceId } })
+      .then((response) => {
+        if (!response.ok) throw new Error('Document preview unavailable')
+        setPreviewType(response.headers.get('Content-Type') || '')
+        return response.blob()
+      })
+      .then((blob) => {
+        objectUrl = URL.createObjectURL(blob)
+        setPreviewUrl(objectUrl)
+      })
+      .catch((reason: Error) => setError(reason.message))
+    return () => { if (objectUrl) URL.revokeObjectURL(objectUrl) }
+  }, [documentId, workspaceId, token])
 
   const submit = async (event: FormEvent, action: 'save' | 'approve' | 'reject') => {
     event.preventDefault()
@@ -59,7 +78,7 @@ export function ReviewWorkspace({ documentId, workspaceId, token, api }: ReviewW
       <div className="review-grid">
         <section className="review-preview" aria-label="Original document preview">
           <div className="review-preview-bar"><FileText size={18} /><strong>Original document</strong></div>
-          <div className="source-placeholder"><FileText size={34} /><strong>Secure document preview</strong><p>Source preview is unavailable until document viewer integration is added.</p></div>
+          {previewUrl ? (previewType === 'application/pdf' ? <object className="document-object" data={previewUrl} type="application/pdf"><p>PDF preview unavailable.</p></object> : <img className="document-image" src={previewUrl} alt="Original document" />) : <div className="source-placeholder"><FileText size={34} /><strong>Loading secure preview</strong></div>}
         </section>
         <form className="review-form" onSubmit={(event) => submit(event, 'save')}>
           <div className="section-heading"><div><h2>Extracted fields</h2><p>Corrections are preserved separately from the original extraction.</p></div></div>

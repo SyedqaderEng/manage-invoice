@@ -55,6 +55,6 @@ All document processing endpoints require the authenticated user, `X-Workspace-I
 | POST | `/api/v1/documents/{documentId}/review/approve` | Approve corrected extraction data |
 | POST | `/api/v1/documents/{documentId}/review/reject` | Record rejection with optional notes |
 
-Review actions preserve original extraction data separately from corrections. Approval changes review state only; Phase 6 owns creation of expense and invoice records.
+Review actions preserve original extraction data separately from corrections. Approval changes review state only; Phase 6 owns creation of expense and invoice records. Viewers may read review state but cannot save, approve, or reject.
 
 Domain controllers must delegate business operations to backend services. The React application must treat these endpoints as its server contract.
