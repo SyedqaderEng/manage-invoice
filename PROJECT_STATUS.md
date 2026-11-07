@@ -93,3 +93,15 @@ Human review implementation is complete in this development slice:
 - Authorized source-document preview loads through the secured download API.
 - Integration tests cover save, approve, audit history, and viewer denial.
 - Seven backend tests and the frontend production build pass.
+
+## Phase 6 Status
+
+Financial record management implementation is complete in this development slice:
+
+- Expense, invoice, payment, vendor, category, line-item, and relationship schema.
+- Decimal-backed expense and invoice entities.
+- Workspace-scoped CRUD REST services.
+- Server-calculated invoice payment balances and status.
+- Currency and overpayment validation for payments.
+- Financial management frontend tables and workspace creation controls.
+- Nine backend tests and frontend production build pass.

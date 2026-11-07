@@ -57,4 +57,17 @@ All document processing endpoints require the authenticated user, `X-Workspace-I
 
 Review actions preserve original extraction data separately from corrections. Approval changes review state only; Phase 6 owns creation of expense and invoice records. Viewers may read review state but cannot save, approve, or reject.
 
+## Phase 6 Endpoints
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET/POST | `/api/v1/expenses` | List or create workspace expenses |
+| DELETE | `/api/v1/expenses/{expenseId}` | Delete an authorized workspace expense |
+| GET/POST | `/api/v1/invoices` | List or create workspace invoices |
+| POST | `/api/v1/invoices/{invoiceId}/payments` | Record an invoice payment |
+| GET/POST | `/api/v1/vendors` | List or create vendors |
+| GET/POST | `/api/v1/categories` | List or create categories |
+
+All endpoints require authentication and `X-Workspace-Id`. Invoice payment totals are recalculated server-side, payment currency must match the invoice currency, and payments cannot exceed the invoice total.
+
 Domain controllers must delegate business operations to backend services. The React application must treat these endpoints as its server contract.

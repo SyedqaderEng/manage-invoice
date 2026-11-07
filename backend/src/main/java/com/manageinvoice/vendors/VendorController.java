@@ -1,0 +1,4 @@
+package com.manageinvoice.vendors;
+import java.util.*; import org.springframework.security.core.annotation.AuthenticationPrincipal; import org.springframework.web.bind.annotation.*;
+import com.manageinvoice.common.security.AuthenticatedUser;
+@RestController @RequestMapping("/api/v1/vendors") public class VendorController { private final VendorService service; public VendorController(VendorService service){this.service=service;} @GetMapping public List<Vendor> list(@AuthenticationPrincipal AuthenticatedUser user,@RequestHeader("X-Workspace-Id") UUID workspaceId){return service.list(workspaceId,user.id());} @PostMapping public Vendor create(@AuthenticationPrincipal AuthenticatedUser user,@RequestHeader("X-Workspace-Id") UUID workspaceId,@RequestBody VendorService.CreateRequest request){return service.create(workspaceId,user.id(),request);} }

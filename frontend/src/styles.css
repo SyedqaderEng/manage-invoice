@@ -91,6 +91,14 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 .workspace-empty { max-width: 620px; margin-top: 48px; padding: 32px; border: 1px solid var(--border); border-radius: 8px; background: white; }
 .inline-create { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 22px; }
 .sidebar-backdrop { display: none; }
+.financial-create { max-width: 620px; }
+.financial-notice { margin-top: 24px; padding: 16px; border-left: 3px solid var(--teal); background: #edf8f5; color: var(--muted); }
+.financial-panel { margin-top: 24px; }
+.financial-table { display: grid; }
+.financial-row { min-height: 58px; display: grid; grid-template-columns: minmax(180px, 1fr) 180px 120px; align-items: center; gap: 16px; padding: 12px 20px; border-bottom: 1px solid var(--border); }
+.financial-row:last-child { border-bottom: 0; }
+.financial-row span { color: var(--muted); }
+
 .document-link { display: flex; align-items: center; gap: 9px; padding: 0; border: 0; background: transparent; color: var(--navy); font-weight: 600; text-align: left; }
 .review-heading { display: flex; justify-content: space-between; align-items: end; }
 .review-heading p { margin: 0 0 6px; color: var(--muted); }

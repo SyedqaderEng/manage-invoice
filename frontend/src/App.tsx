@@ -8,6 +8,7 @@ import { StatusBadge } from './components/ui/StatusBadge'
 import { DocumentsPage } from './features/documents/DocumentsPage'
 import { LandingPage } from './features/landing/LandingPage'
 import { ReviewWorkspace } from './features/review/ReviewWorkspace'
+import { FinancialPage } from './features/financials/FinancialPage'
 
 interface User { id: string; email: string; firstName: string; lastName: string }
 interface Workspace { id: string; name: string; workspaceType: 'PERSONAL' | 'BUSINESS' | 'ACCOUNTANT'; defaultCurrency: string; role: string }
@@ -118,7 +119,9 @@ export function App() {
       <div className="main-column">
         <TopBar userName={userName} workspaceName={activeWorkspace?.name || 'No workspace'} onMenu={() => setMobileOpen(true)} />
         <main className="page-content">
-          {section.startsWith('documents/review/') ? (
+          {['expenses', 'invoices', 'vendors', 'categories'].includes(section) ? (
+            <FinancialPage section={section} workspaceId={activeWorkspace?.id} token={token} api={api} />
+          ) : section.startsWith('documents/review/') ? (
             <ReviewWorkspace documentId={section.split('/').at(-1) || ''} workspaceId={activeWorkspace?.id} token={token} api={api} />
           ) : section === 'documents' ? <DocumentsPage token={token} workspaceId={activeWorkspace?.id} api={api} /> : (
           <>
