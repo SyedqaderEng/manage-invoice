@@ -46,4 +46,15 @@ Uploads are validated from file signatures, not filename extensions. Duplicate S
 
 All document processing endpoints require the authenticated user, `X-Workspace-Id`, and workspace membership. OCR uses the configured provider abstraction; extraction confidence below review thresholds routes documents to review-required status.
 
+## Phase 5 Endpoints
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/v1/documents/{documentId}/review` | Return original and corrected review state |
+| POST | `/api/v1/documents/{documentId}/review/save` | Save a reviewer draft |
+| POST | `/api/v1/documents/{documentId}/review/approve` | Approve corrected extraction data |
+| POST | `/api/v1/documents/{documentId}/review/reject` | Record rejection with optional notes |
+
+Review actions preserve original extraction data separately from corrections. Approval changes review state only; Phase 6 owns creation of expense and invoice records.
+
 Domain controllers must delegate business operations to backend services. The React application must treat these endpoints as its server contract.

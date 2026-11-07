@@ -93,7 +93,7 @@ export function DocumentsPage({ token, workspaceId, api }: DocumentsPageProps) {
             <div className="document-table-head" role="row"><span>File</span><span>Size</span><span>Status</span><span>Uploaded</span></div>
             {documents.map((document) => (
               <div className="document-table-row" role="row" key={document.id}>
-                <span><FileText size={17} />{document.originalFilename}</span>
+                <span><button className="document-link" onClick={() => window.location.hash = `documents/review/${document.id}`}><FileText size={17} />{document.originalFilename}</button></span>
                 <span>{formatSize(document.fileSize)}</span>
                 <StatusBadge label={document.processingStatus.replaceAll('_', ' ').toLowerCase()} tone={document.processingStatus === 'REVIEW_REQUIRED' || document.processingStatus === 'FAILED' ? 'warning' : document.processingStatus === 'EXTRACTED' || document.processingStatus === 'APPROVED' ? 'success' : 'neutral'} />
                 <span>{new Date(document.uploadedAt).toLocaleDateString()}</span>
