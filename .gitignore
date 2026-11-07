@@ -12,3 +12,5 @@ backend/storage/
 .env.*
 !.env.example
 *.log
+
+*.tsbuildinfo
