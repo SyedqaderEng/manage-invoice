@@ -1,0 +1,52 @@
+# Project Status
+
+## Current Phase
+
+Phase 0: Project Foundation and Architecture.
+
+## Phase 0 Implementation Plan
+
+1. Create repository structure for the Spring Boot modular-monolith API and React application.
+2. Configure PostgreSQL, Redis, Flyway, Actuator, and OpenAPI.
+3. Add a REST health endpoint and backend API integration tests.
+4. Add the React application shell and API connectivity.
+5. Provide Docker Compose services for local infrastructure.
+6. Validate backend tests and frontend build.
+7. Record completion only after acceptance criteria pass.
+
+## Phase 0 Acceptance Criteria
+
+- Frontend starts locally.
+- Backend starts locally.
+- PostgreSQL configuration is present.
+- Flyway migration runs against PostgreSQL.
+- Health endpoints respond successfully.
+- OpenAPI documentation is available.
+- Foundation automated tests pass.
+
+## Status
+
+Phase 0 foundation completed.
+
+Phase 1 implementation is complete in the backend and frontend authentication shell:
+
+- Spring Security and JWT REST authentication are implemented.
+- Registration, login, logout, and authenticated user lookup are available.
+- Workspace creation, listing, switching, and member lookup are available.
+- Workspace membership is enforced server-side before tenant resources are returned.
+- Cross-workspace member access is covered by an automated isolation test.
+- PostgreSQL and Flyway are the persistence foundation.
+- React authentication and workspace switching call backend REST endpoints.
+
+## Phase 2 Status
+
+Phase 2 frontend foundation is implemented and builds successfully:
+
+- Centralized navigation, tokens, responsive shell, auth screen, and shared UI primitives.
+- Desktop sidebar and mobile navigation drawer.
+- Workspace selector integrated with backend-provided workspace records.
+- Top navigation, account identity, global search surface, and notification control.
+- Empty states without fabricated financial metrics.
+- Lucide icons with accessible labels for unfamiliar controls.
+
+The next phase is Document Upload and Storage, including private object storage, file validation, metadata persistence, REST upload APIs, and document status UI.

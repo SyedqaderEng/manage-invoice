@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: manage-invoice-api
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/manage_invoice}
+    username: ${DATABASE_USERNAME:manage_invoice}
+    password: ${DATABASE_PASSWORD:manage_invoice}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+
+springdoc:
+  api-docs:
+    path: /api/v1/openapi
+  swagger-ui:
+    path: /api/v1/docs
