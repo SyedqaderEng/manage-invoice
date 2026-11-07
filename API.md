@@ -36,4 +36,14 @@ Tenant APIs require `Authorization: Bearer <token>`. Workspace-specific resource
 
 Uploads are validated from file signatures, not filename extensions. Duplicate SHA-256 checksums are rejected within the workspace. Files are stored through the private object-storage abstraction; callers receive metadata only.
 
+## Phase 4 Endpoints
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/v1/documents/{documentId}/processing-status` | Return document and processing job status |
+| GET | `/api/v1/documents/{documentId}/extraction` | Return the latest normalized extraction |
+| POST | `/api/v1/documents/{documentId}/reprocess` | Queue authorized document reprocessing |
+
+All document processing endpoints require the authenticated user, `X-Workspace-Id`, and workspace membership. OCR uses the configured provider abstraction; extraction confidence below review thresholds routes documents to review-required status.
+
 Domain controllers must delegate business operations to backend services. The React application must treat these endpoints as its server contract.

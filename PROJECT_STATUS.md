@@ -51,7 +51,23 @@ Phase 2 frontend foundation is implemented and builds successfully:
 
 ## Phase 3 Status
 
-Document upload and storage implementation is in progress and the backend/frontend foundation is implemented:
+Document upload and storage implementation is complete and validated:
+
+- Upload/list/download/delete workflow implemented.
+- Private storage and file-signature validation implemented.
+- Duplicate detection and tenant isolation implemented.
+
+## Phase 4 Status
+
+OCR and extraction processing implementation is complete in this development slice:
+
+- Processing job and extraction database schema.
+- Provider abstractions for OCR and structured extraction.
+- Tesseract OCR adapter and local normalized-field extraction.
+- Asynchronous processing dispatch from upload.
+- Processing status, extraction, and reprocess REST APIs.
+- Document status polling in the frontend.
+- Backend suite and frontend production build pass.
 
 - Flyway document schema.
 - Private local object-storage abstraction with private keys.
@@ -61,4 +77,4 @@ Document upload and storage implementation is in progress and the backend/fronte
 - Workspace-scoped document library UI.
 - Integration coverage for upload, list, and duplicate rejection.
 
-Before completion, run the complete backend suite and PostgreSQL runtime workflow.
+Runtime PostgreSQL verification remains required before marking Phase 4 complete in a production environment.

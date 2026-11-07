@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.manageinvoice.documents.storage.ObjectStorage;
 import com.manageinvoice.identity.UserRepository;
+import com.manageinvoice.processing.ProcessingService;
 import com.manageinvoice.tenancy.Workspace;
 import com.manageinvoice.tenancy.WorkspaceService;
 
@@ -27,12 +28,14 @@ public class DocumentService {
     private final WorkspaceService workspaces;
     private final UserRepository users;
     private final ObjectStorage storage;
+    private final ProcessingService processingService;
 
-    public DocumentService(DocumentRepository documents, WorkspaceService workspaces, UserRepository users, ObjectStorage storage) {
+    public DocumentService(DocumentRepository documents, WorkspaceService workspaces, UserRepository users, ObjectStorage storage, ProcessingService processingService) {
         this.documents = documents;
         this.workspaces = workspaces;
         this.users = users;
         this.storage = storage;
+        this.processingService = processingService;
     }
 
     public Page<DocumentResponse> list(UUID workspaceId, UUID userId, Pageable pageable) {
@@ -68,6 +71,7 @@ public class DocumentService {
             document.setFileSize(content.length);
             document.setChecksum(checksum);
             documents.save(document);
+            processingService.enqueue(workspaceId, document.getId());
             return new DocumentResponse(document);
         } catch (ResponseStatusException exception) {
             throw exception;

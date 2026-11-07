@@ -36,7 +36,11 @@ export function DocumentsPage({ token, workspaceId, api }: DocumentsPageProps) {
     }
   }
 
-  useEffect(() => { loadDocuments() }, [workspaceId, token])
+  useEffect(() => {
+    loadDocuments()
+    const refresh = window.setInterval(loadDocuments, 5000)
+    return () => window.clearInterval(refresh)
+  }, [workspaceId, token])
 
   const upload = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -91,7 +95,7 @@ export function DocumentsPage({ token, workspaceId, api }: DocumentsPageProps) {
               <div className="document-table-row" role="row" key={document.id}>
                 <span><FileText size={17} />{document.originalFilename}</span>
                 <span>{formatSize(document.fileSize)}</span>
-                <StatusBadge label={document.processingStatus.replaceAll('_', ' ').toLowerCase()} tone="neutral" />
+                <StatusBadge label={document.processingStatus.replaceAll('_', ' ').toLowerCase()} tone={document.processingStatus === 'REVIEW_REQUIRED' || document.processingStatus === 'FAILED' ? 'warning' : document.processingStatus === 'EXTRACTED' || document.processingStatus === 'APPROVED' ? 'success' : 'neutral'} />
                 <span>{new Date(document.uploadedAt).toLocaleDateString()}</span>
               </div>
             ))}

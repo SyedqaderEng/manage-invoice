@@ -58,5 +58,6 @@ public class Document {
     public Instant getArchivedAt() { return archivedAt; }
     public Instant getDeletedAt() { return deletedAt; }
     public void archive() { archivedAt = Instant.now(); processingStatus = DocumentStatus.ARCHIVED; }
+    public void setProcessingStatus(DocumentStatus processingStatus) { this.processingStatus = processingStatus; }
     public void softDelete() { deletedAt = Instant.now(); }
 }
