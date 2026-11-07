@@ -5,6 +5,7 @@ import { Sidebar } from './components/navigation/Sidebar'
 import { TopBar } from './components/navigation/TopBar'
 import { Button } from './components/ui/Button'
 import { StatusBadge } from './components/ui/StatusBadge'
+import { DocumentsPage } from './features/documents/DocumentsPage'
 
 interface User { id: string; email: string; firstName: string; lastName: string }
 interface Workspace { id: string; name: string; workspaceType: 'PERSONAL' | 'BUSINESS' | 'ACCOUNTANT'; defaultCurrency: string; role: string }
@@ -33,6 +34,13 @@ export function App() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [error, setError] = useState('')
   const [workspaceName, setWorkspaceName] = useState('')
+  const [section, setSection] = useState(() => window.location.hash.replace('#', '') || 'overview')
+
+  useEffect(() => {
+    const handleHash = () => setSection(window.location.hash.replace('#', '') || 'overview')
+    window.addEventListener('hashchange', handleHash)
+    return () => window.removeEventListener('hashchange', handleHash)
+  }, [])
 
   useEffect(() => {
     if (!token) return
@@ -85,10 +93,12 @@ export function App() {
   return (
     <div className="app-shell">
       {mobileOpen ? <button className="sidebar-backdrop" aria-label="Close navigation" onClick={() => setMobileOpen(false)} /> : null}
-      <Sidebar workspaces={workspaces} activeWorkspaceId={activeWorkspace?.id} onWorkspaceChange={(id) => selectWorkspace(workspaces.find((item) => item.id === id) || null)} onLogout={logout} mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
+      <Sidebar workspaces={workspaces} activeWorkspaceId={activeWorkspace?.id} onWorkspaceChange={(id) => selectWorkspace(workspaces.find((item) => item.id === id) || null)} onLogout={logout} mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} activeSection={section} />
       <div className="main-column">
         <TopBar userName={userName} workspaceName={activeWorkspace?.name || 'No workspace'} onMenu={() => setMobileOpen(true)} />
         <main className="page-content">
+          {section === 'documents' ? <DocumentsPage token={token} workspaceId={activeWorkspace?.id} api={api} /> : (
+          <>
           <div className="page-heading">
             <div><p>Overview</p><h1>{activeWorkspace ? `Good morning, ${user?.firstName || 'there'}` : 'Workspace setup'}</h1></div>
             <Button icon={<Upload size={18} />} disabled={!activeWorkspace}>Upload document</Button>
@@ -117,6 +127,8 @@ export function App() {
                 <div className="empty-state"><span className="empty-icon"><Upload size={22} /></span><h3>No processing activity</h3><p>Uploaded documents and processing status will appear here.</p></div>
               </section>
             </>
+          )}
+          </>
           )}
         </main>
       </div>

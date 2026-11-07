@@ -16,6 +16,7 @@ interface SidebarProps {
   onLogout: () => void
   mobileOpen: boolean
   onClose: () => void
+  activeSection?: string
 }
 
 const primaryItems = [
@@ -41,7 +42,7 @@ export function Sidebar(props: SidebarProps) {
       </label>
       <nav className="sidebar-nav" aria-label="Primary navigation">
         {primaryItems.map(({ label, icon: Icon, active }) => (
-          <a className={active ? 'nav-item active' : 'nav-item'} href={active ? '#' : `#${label.toLowerCase()}`} key={label} onClick={props.onClose}>
+          <a className={(props.activeSection === label.toLowerCase() || (!props.activeSection && label === 'Overview')) ? 'nav-item active' : 'nav-item'} href={label === 'Overview' ? '#' : `#${label.toLowerCase()}`} key={label} onClick={props.onClose}>
             <Icon size={18} aria-hidden="true" /><span>{label}</span>
             {!active && label !== 'Overview' ? null : null}
           </a>

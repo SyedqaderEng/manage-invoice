@@ -49,4 +49,16 @@ Phase 2 frontend foundation is implemented and builds successfully:
 - Empty states without fabricated financial metrics.
 - Lucide icons with accessible labels for unfamiliar controls.
 
-The next phase is Document Upload and Storage, including private object storage, file validation, metadata persistence, REST upload APIs, and document status UI.
+## Phase 3 Status
+
+Document upload and storage implementation is in progress and the backend/frontend foundation is implemented:
+
+- Flyway document schema.
+- Private local object-storage abstraction with private keys.
+- Real file signature validation for PDF, JPG, PNG, and WEBP.
+- 25 MB upload limit and SHA-256 duplicate detection.
+- Workspace-authorized upload, list, download, and soft-delete REST APIs.
+- Workspace-scoped document library UI.
+- Integration coverage for upload, list, and duplicate rejection.
+
+Before completion, run the complete backend suite and PostgreSQL runtime workflow.

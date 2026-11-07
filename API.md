@@ -25,4 +25,15 @@ The API base path is `/api/v1`.
 
 Tenant APIs require `Authorization: Bearer <token>`. Workspace-specific resources must additionally resolve and authorize the selected workspace on the backend.
 
+## Phase 3 Endpoints
+
+| Method | Path | Purpose |
+|---|---|---|
+| POST | `/api/v1/documents` | Upload a supported document to the workspace in `X-Workspace-Id` |
+| GET | `/api/v1/documents` | List non-deleted workspace documents |
+| GET | `/api/v1/documents/{documentId}/download` | Download an authorized workspace document |
+| DELETE | `/api/v1/documents/{documentId}` | Soft-delete an authorized workspace document |
+
+Uploads are validated from file signatures, not filename extensions. Duplicate SHA-256 checksums are rejected within the workspace. Files are stored through the private object-storage abstraction; callers receive metadata only.
+
 Domain controllers must delegate business operations to backend services. The React application must treat these endpoints as its server contract.
