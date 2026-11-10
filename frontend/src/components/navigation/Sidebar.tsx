@@ -1,4 +1,4 @@
-import { LayoutDashboard, LogOut, Settings, ScanLine } from 'lucide-react'
+import { FileText, LayoutDashboard, LogOut, Settings, ScanLine, Store, Tags } from 'lucide-react'
 
 interface SidebarProps {
   onLogout: () => void
@@ -18,6 +18,15 @@ export function Sidebar(props: SidebarProps) {
       <nav className="sidebar-nav" aria-label="Primary navigation">
         <button className={`nav-item ${props.activeSection === 'dashboard' ? 'active' : ''}`} onClick={() => { props.onNavigate('dashboard'); props.onClose() }}>
           <LayoutDashboard size={18} aria-hidden="true" /><span>Overview</span>
+        </button>
+        <button className={`nav-item ${props.activeSection === 'documents' ? 'active' : ''}`} onClick={() => { props.onNavigate('documents'); props.onClose() }}>
+          <FileText size={18} aria-hidden="true" /><span>Documents</span>
+        </button>
+        <button className={`nav-item ${props.activeSection === 'vendors' ? 'active' : ''}`} onClick={() => { props.onNavigate('vendors'); props.onClose() }}>
+          <Store size={18} aria-hidden="true" /><span>Vendors</span>
+        </button>
+        <button className={`nav-item ${props.activeSection === 'categories' ? 'active' : ''}`} onClick={() => { props.onNavigate('categories'); props.onClose() }}>
+          <Tags size={18} aria-hidden="true" /><span>Categories</span>
         </button>
       </nav>
       <div className="sidebar-bottom">

@@ -5,13 +5,15 @@ import { Sidebar } from './components/navigation/Sidebar'
 import { TopBar } from './components/navigation/TopBar'
 import { Button } from './components/ui/Button'
 import { LandingPage } from './features/landing/LandingPage'
+import { DocumentLibrary } from './features/documents/DocumentLibrary'
+import { CustomerDataPage } from './features/documents/CustomerDataPage'
 
 interface User { id: string; email: string; firstName: string; lastName: string }
 interface AuthResponse { accessToken: string; user: User }
 
 const api = async <T,>(path: string, options: RequestInit = {}, token?: string): Promise<T> => {
   const headers = new Headers(options.headers)
-  if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json')
+  if (!headers.has('Content-Type') && !(options.body instanceof FormData)) headers.set('Content-Type', 'application/json')
   if (token) headers.set('Authorization', `Bearer ${token}`)
   const response = await fetch(path, { ...options, headers })
   if (!response.ok) {
@@ -27,7 +29,7 @@ export function App() {
   const [user, setUser] = useState<User | null>(null)
   const [error, setError] = useState('')
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [section, setSection] = useState('dashboard')
+  const [section, setSection] = useState(() => window.location.hash.slice(1) || 'dashboard')
   const [pathname, setPathname] = useState(() => window.location.pathname)
 
   const navigate = (path: string) => {
@@ -93,7 +95,9 @@ export function App() {
           {section === 'settings' ? (
             <AccountSettings user={user} token={token} api={api} onSaved={setUser} />
           ) : section === 'documents' ? (
-            <section className="empty-page-card"><span className="dashboard-icon"><FileText size={22} /></span><p className="section-kicker">YOUR LIBRARY</p><h1>Your personal library.</h1><p>Your receipt and invoice history will live here, connected to the original documents.</p><Button onClick={() => navigate('/app#dashboard')}>Back to overview</Button></section>
+            <DocumentLibrary token={token} api={api} />
+          ) : section === 'vendors' || section === 'categories' ? (
+            <CustomerDataPage section={section} token={token} api={api} />
           ) : (
             <Dashboard user={user} onNavigate={navigate} />
           )}
@@ -109,10 +113,10 @@ function Dashboard({ user, onNavigate }: { user: User | null; onNavigate: (path:
     <>
       <div className="dashboard-heading">
         <div><p className="section-kicker">YOUR PERSONAL FINANCE SPACE</p><h1>A clearer picture, {firstName}.</h1><p className="dashboard-subtitle">Your receipts and invoices, organized around your life.</p></div>
-        <Button onClick={() => onNavigate('/app#documents')}><Plus size={17} /> Open document library</Button>
+        <Button onClick={() => onNavigate('/app#documents')}><Plus size={17} /> Upload documents</Button>
       </div>
       <section className="dashboard-welcome">
-        <div className="welcome-copy"><span className="welcome-label"><Sparkles size={14} /> A FRESH START</span><h2>Make your paperwork<br />work a little less.</h2><p>Bring your receipts and invoices together. Keep the original close, find what you need, and see your spending more clearly.</p><Button onClick={() => onNavigate('/app#documents')}>Open your library <ArrowUpRight size={16} /></Button></div>
+        <div className="welcome-copy"><span className="welcome-label"><Sparkles size={14} /> A FRESH START</span><h2>Make your paperwork<br />work a little less.</h2><p>Bring your receipts and invoices together. Keep the original close, find what you need, and see your spending more clearly.</p><Button onClick={() => onNavigate('/app#documents')}>Upload a document <ArrowUpRight size={16} /></Button></div>
         <div className="welcome-art" aria-hidden="true"><div className="art-glow" /><div className="art-sheet sheet-back"><span /><span /><span /></div><div className="art-sheet sheet-front"><span className="art-receipt-icon"><FileImage size={20} /></span><span className="art-line" /><span className="art-line short" /><span className="art-line" /><span className="art-total"><i /> <b /></span></div><div className="art-sparkle sparkle-a">✳</div><div className="art-sparkle sparkle-b">✦</div><div className="art-sticker">YOUR<br />RECORDS,<br /><strong>IN FOCUS</strong></div></div>
       </section>
       <section className="dashboard-section-heading"><div><p className="section-kicker">WHEN YOU’RE READY</p><h2>Your overview will grow with you.</h2></div><button className="text-link" onClick={() => onNavigate('/app#documents')}>Your documents <ArrowUpRight size={15} /></button></section>
