@@ -39,8 +39,8 @@ export function AuthScreen({ onAuthenticated, api, initialMode, onNavigate }: Au
   return (
     <main className="auth-layout">
       <section className="auth-brand-panel">
-        <button className="auth-brand" type="button" onClick={() => onNavigate('/')}><span className="brand-mark light">M</span><strong>Manage Invoice</strong></button>
-        <blockquote>Document intelligence for clearer financial decisions.</blockquote>
+        <button className="auth-brand" type="button" onClick={() => onNavigate('/')}><span className="brand-mark light">S</span><strong>SaaS Starter</strong></button>
+        <blockquote>A secure foundation for your next SaaS product.</blockquote>
       </section>
       <section className="auth-panel">
         <div className="auth-form-wrap">
@@ -49,7 +49,7 @@ export function AuthScreen({ onAuthenticated, api, initialMode, onNavigate }: Au
             <button className={mode === 'register' ? 'active' : ''} onClick={() => setMode('register')} type="button">Create account</button>
           </div>
           <h1>{mode === 'login' ? 'Welcome back' : 'Create your workspace account'}</h1>
-          <p className="auth-description">{mode === 'login' ? 'Sign in to continue to Manage Invoice.' : 'Start organizing documents, expenses, and invoices.'}</p>
+          <p className="auth-description">{mode === 'login' ? 'Sign in to continue to your workspace.' : 'Create an account to get started.'}</p>
           <form className="auth-form" onSubmit={submit}>
             {mode === 'register' ? (
               <div className="two-column-fields">

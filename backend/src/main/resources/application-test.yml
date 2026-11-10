@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:manageinvoice;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    url: jdbc:h2:mem:saasstarter;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
     username: sa
     password:
   jpa:
@@ -8,5 +8,6 @@ spring:
       ddl-auto: create-drop
   flyway:
     enabled: false
-  autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+security:
+  jwt:
+    secret: test-only-secret-change-before-deployment-32-characters

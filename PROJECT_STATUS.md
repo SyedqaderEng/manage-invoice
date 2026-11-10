@@ -1,114 +1,22 @@
-# Project Status
+# SaaS Starter Status
 
-## Current Phase
+## Included foundations
 
-Phase 0: Project Foundation and Architecture.
+- Spring Boot REST API with JWT registration, login, logout, and authenticated profile management.
+- PostgreSQL/Flyway persistence and workspace membership isolation.
+- Workspace creation, switching, membership management, and owner/admin/member roles.
+- Responsive React app shell, public landing/pricing, profile settings, team admin, and billing views.
+- Stripe Checkout, customer portal, signed webhook verification, and idempotent event handling.
 
-## Phase 0 Implementation Plan
+## Configuration required
 
-1. Create repository structure for the Spring Boot modular-monolith API and React application.
-2. Configure PostgreSQL, Redis, Flyway, Actuator, and OpenAPI.
-3. Add a REST health endpoint and backend API integration tests.
-4. Add the React application shell and API connectivity.
-5. Provide Docker Compose services for local infrastructure.
-6. Validate backend tests and frontend build.
-7. Record completion only after acceptance criteria pass.
+- `JWT_SECRET` must be a random value of at least 32 bytes.
+- Configure Stripe API and webhook secrets plus the recurring price IDs for Starter, Pro, and Team.
+- Edit the sample plans/prices in `backend/src/main/java/com/saasstarter/billing/BillingService.java` to match product configuration.
 
-## Phase 0 Acceptance Criteria
+## Current limitations
 
-- Frontend starts locally.
-- Backend starts locally.
-- PostgreSQL configuration is present.
-- Flyway migration runs against PostgreSQL.
-- Health endpoints respond successfully.
-- OpenAPI documentation is available.
-- Foundation automated tests pass.
-
-## Status
-
-Phase 0 foundation completed.
-
-Phase 1 implementation is complete in the backend and frontend authentication shell:
-
-- Spring Security and JWT REST authentication are implemented.
-- Registration, login, logout, and authenticated user lookup are available.
-- Workspace creation, listing, switching, and member lookup are available.
-- Workspace membership is enforced server-side before tenant resources are returned.
-- Cross-workspace member access is covered by an automated isolation test.
-- PostgreSQL and Flyway are the persistence foundation.
-- React authentication and workspace switching call backend REST endpoints.
-
-## Phase 2 Status
-
-Phase 2 frontend foundation is implemented and builds successfully:
-
-- Centralized navigation, tokens, responsive shell, auth screen, and shared UI primitives.
-- Desktop sidebar and mobile navigation drawer.
-- Workspace selector integrated with backend-provided workspace records.
-- Top navigation, account identity, global search surface, and notification control.
-- Empty states without fabricated financial metrics.
-- Lucide icons with accessible labels for unfamiliar controls.
-
-## Phase 3 Status
-
-Document upload and storage implementation is complete and validated:
-
-- Upload/list/download/delete workflow implemented.
-- Private storage and file-signature validation implemented.
-- Duplicate detection and tenant isolation implemented.
-
-## Phase 4 Status
-
-OCR and extraction processing implementation is complete in this development slice:
-
-- Processing job and extraction database schema.
-- Provider abstractions for OCR and structured extraction.
-- Tesseract OCR adapter and local normalized-field extraction.
-- Asynchronous processing dispatch from upload.
-- Processing status, extraction, and reprocess REST APIs.
-- Document status polling in the frontend.
-- Backend suite and frontend production build pass.
-
-- Flyway document schema.
-- Private local object-storage abstraction with private keys.
-- Real file signature validation for PDF, JPG, PNG, and WEBP.
-- 25 MB upload limit and SHA-256 duplicate detection.
-- Workspace-authorized upload, list, download, and soft-delete REST APIs.
-- Workspace-scoped document library UI.
-- Integration coverage for upload, list, and duplicate rejection.
-
-Runtime PostgreSQL verification remains required before marking Phase 4 complete in a production environment.
-
-## Phase 5 Status
-
-Human review implementation is complete in this development slice:
-
-- Review audit database migration and entity.
-- Original extraction and corrected-data separation.
-- Save, approve, and reject REST endpoints.
-- Workspace role enforcement for review actions.
-- Viewer read-only protection.
-- Side-by-side review workspace UI.
-- Approval does not silently create Phase 6 financial records.
-- Authorized source-document preview loads through the secured download API.
-- Integration tests cover save, approve, audit history, and viewer denial.
-- Seven backend tests and the frontend production build pass.
-
-## Phase 6 Status
-
-Financial record management implementation is complete in this development slice:
-
-- Expense, invoice, payment, vendor, category, line-item, and relationship schema.
-- Decimal-backed expense and invoice entities.
-- Workspace-scoped CRUD REST services.
-- Server-calculated invoice payment balances and status.
-- Currency and overpayment validation for payments.
-- Financial management frontend tables and workspace creation controls.
-- Nine backend tests and frontend production build pass.
-- Expense detail/update/delete and invoice detail/update/delete completed.
-- Vendor/category update/archive and duplicate vendor detection completed.
-- Invoice duplicate detection, payment balance, overpayment, and tenant isolation completed.
-- Approved receipts and invoices create matching records exactly once.
-- Explicit invoice/receipt document relationships are available through REST.
-- PostgreSQL migrations V1-V8 and Hibernate validation pass.
-- Ten backend tests and frontend production build pass.
+- Team management can add an account that already exists; invitation email delivery is not configured.
+- The displayed price values and plan copy are starter defaults, not a commercial recommendation.
+- Password reset and email verification are not included.
+- Historical invoice/document Flyway migrations remain for database compatibility, but application code for those domains is removed.

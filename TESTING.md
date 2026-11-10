@@ -1,13 +1,22 @@
-# Testing Strategy
+# Testing
 
 ## Backend
 
-JUnit 5 and Spring Boot Test cover application context startup, REST endpoints, tenant isolation, validation, financial rules, and persistence.
+JUnit 5 and Spring Boot Test cover API startup, health, authentication, workspace authorization, billing APIs, and Stripe webhook behavior.
+
+```bash
+cd backend
+mvn test
+```
+
+Tests use an in-memory H2 database and a test-only JWT signing secret.
 
 ## Frontend
 
-Vitest and React Testing Library cover component behavior. Playwright covers critical end-to-end workflows.
+Vitest runs frontend unit tests; the production build runs TypeScript checks.
 
-## Release Gate
-
-A phase is complete only when its acceptance criteria pass executable checks, not compilation alone.
+```bash
+cd frontend
+npm test
+npm run build
+```

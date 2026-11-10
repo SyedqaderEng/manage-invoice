@@ -1,29 +1,19 @@
 spring:
   application:
-    name: manage-invoice-api
+    name: saas-starter-api
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/manage_invoice}
-    username: ${DATABASE_USERNAME:manage_invoice}
-    password: ${DATABASE_PASSWORD:manage_invoice}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/saas_starter}
+    username: ${DATABASE_USERNAME:saas_starter}
+    password: ${DATABASE_PASSWORD:saas_starter}
   jpa:
     open-in-view: false
     hibernate:
       ddl-auto: validate
   flyway:
     enabled: true
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-  servlet:
-    multipart:
-      max-file-size: 25MB
-      max-request-size: 25MB
-
-storage:
-  local:
-    root: ${STORAGE_LOCAL_ROOT:./storage}
-
+security:
+  jwt:
+    secret: ${JWT_SECRET}
 management:
   endpoints:
     web:
@@ -38,3 +28,18 @@ springdoc:
     path: /api/v1/openapi
   swagger-ui:
     path: /api/v1/docs
+
+billing:
+  stripe:
+    secret-key: ${STRIPE_SECRET_KEY:}
+    webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+    success-url: ${STRIPE_SUCCESS_URL:http://localhost:5173/app#billing?success=true}
+    cancel-url: ${STRIPE_CANCEL_URL:http://localhost:5173/app#billing?cancelled=true}
+    return-url: ${STRIPE_RETURN_URL:http://localhost:5173/app#billing}
+    prices:
+      starter-monthly: ${STRIPE_PRICE_STARTER_MONTHLY:}
+      starter-yearly: ${STRIPE_PRICE_STARTER_YEARLY:}
+      pro-monthly: ${STRIPE_PRICE_PRO_MONTHLY:}
+      pro-yearly: ${STRIPE_PRICE_PRO_YEARLY:}
+      team-monthly: ${STRIPE_PRICE_TEAM_MONTHLY:}
+      team-yearly: ${STRIPE_PRICE_TEAM_YEARLY:}

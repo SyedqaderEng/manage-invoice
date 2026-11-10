@@ -1,71 +1,102 @@
-import { ArrowRight, BarChart3, FileCheck2, ReceiptText, ShieldCheck } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { ArrowRight, Check, Layers3, ShieldCheck, Users } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
+import { formatPlanPrice } from '../billing/pricing'
+
+interface Plan {
+  id: string
+  name: string
+  description: string
+  monthlyPrice: number
+  yearlyPrice: number
+}
 
 interface LandingPageProps {
   onNavigate: (path: string) => void
+  api: <T>(path: string, options?: RequestInit, token?: string) => Promise<T>
 }
 
-export function LandingPage({ onNavigate }: LandingPageProps) {
+export function LandingPage({ onNavigate, api }: LandingPageProps) {
+  const [plans, setPlans] = useState<Plan[]>([])
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    api<Plan[]>('/api/v1/billing/plans').then(setPlans).catch((reason: Error) => setError(reason.message))
+  }, [])
+
   return (
     <main className="landing-page">
       <nav className="landing-nav" aria-label="Main navigation">
-        <a className="landing-brand" href="/" onClick={(event) => { event.preventDefault(); onNavigate('/') }}><span className="brand-mark">M</span>Manage Invoice</a>
+        <a className="landing-brand" href="/" onClick={(event) => { event.preventDefault(); onNavigate('/') }}><span className="brand-mark">S</span>SaaS Starter</a>
         <div className="landing-nav-links">
-          <a href="#product">Product</a>
-          <a href="#workflow">How it works</a>
+          <a href="#features">Features</a>
           <a href="#pricing">Pricing</a>
         </div>
         <div className="landing-actions">
           <Button variant="ghost" onClick={() => onNavigate('/login')}>Sign in</Button>
-          <Button onClick={() => onNavigate('/register')}>Start free</Button>
+          <Button onClick={() => onNavigate('/register')}>Get started</Button>
         </div>
       </nav>
 
       <section className="landing-hero">
         <div className="landing-copy">
-          <p className="landing-eyebrow">AI document operations</p>
-          <h1>From invoice to answer, without the busywork.</h1>
-          <p>Capture invoices and receipts, review extracted financial data, and understand spending from one secure workspace.</p>
+          <p className="landing-eyebrow">A foundation for your next product</p>
+          <h1>Your SaaS, built on a foundation that scales.</h1>
+          <p>Start with secure accounts, team workspaces, role-based access, and subscription billing. Spend your time building the product that makes your idea unique.</p>
           <div className="landing-hero-actions">
-            <Button icon={<ArrowRight size={18} />} onClick={() => onNavigate('/register')}>Create a workspace</Button>
-            <a href="#product">Explore the product</a>
+            <Button icon={<ArrowRight size={18} />} onClick={() => onNavigate('/register')}>Create your account</Button>
+            <a href="#pricing">Explore plans</a>
           </div>
         </div>
-        <div className="landing-preview" aria-label="Product preview">
-          <div className="preview-topbar"><span /><span /><span /><small>Document review</small></div>
-          <div className="preview-body">
-            <div className="preview-document"><div className="preview-line wide" /><div className="preview-line" /><div className="preview-box" /><div className="preview-line wide" /><div className="preview-line short" /></div>
-            <div className="preview-fields"><small>Extracted data</small><div><span>Vendor</span><strong>Northstar Office</strong></div><div><span>Total</span><strong>$1,284.00</strong></div><div><span>Status</span><strong className="preview-ready">Ready for review</strong></div></div>
+        <div className="landing-preview starter-preview" aria-label="Workspace product preview">
+          <div className="preview-topbar"><span /><span /><span /><small>Workspace overview</small></div>
+          <div className="starter-preview-content">
+            <div className="starter-preview-heading"><span className="brand-mark">S</span><div><strong>Acme workspace</strong><small>Team plan</small></div></div>
+            <div className="starter-preview-stat"><span>Team members</span><strong>12</strong></div>
+            <div className="starter-preview-stat"><span>Subscription</span><strong className="preview-ready">Active</strong></div>
+            <div className="starter-preview-members"><span /><span /><span /><small>+9 teammates</small></div>
           </div>
         </div>
       </section>
 
-      <section className="landing-proof" aria-label="Product benefits">
-        <div><strong>Document intelligence</strong><span>Structured extraction with human review</span></div>
-        <div><strong>Expense clarity</strong><span>Expenses and invoices stay distinct</span></div>
-        <div><strong>Workspace security</strong><span>Tenant-aware records and access</span></div>
+      <section className="landing-proof" aria-label="Platform features">
+        <div><strong>Authentication</strong><span>Secure account access</span></div>
+        <div><strong>Multi-tenant</strong><span>Workspace isolation</span></div>
+        <div><strong>Subscriptions</strong><span>Stripe-ready billing</span></div>
       </section>
 
-      <section className="landing-features" id="product">
-        <div className="landing-section-heading"><p>Built for financial control</p><h2>Less data entry. More confidence.</h2></div>
+      <section className="landing-features" id="features">
+        <div className="landing-section-heading"><p>Product foundations</p><h2>The essentials, already connected.</h2></div>
         <div className="feature-grid">
-          <article><span><FileCheck2 size={21} /></span><h3>Review every extraction</h3><p>Compare source documents with normalized fields before approval. Corrections remain auditable.</p></article>
-          <article><span><ReceiptText size={21} /></span><h3>Keep payments accurate</h3><p>Track expenses, invoices, payment evidence, and balances without counting the same record twice.</p></article>
-          <article><span><BarChart3 size={21} /></span><h3>Understand spending</h3><p>Build clear reporting by category, vendor, date, and workspace once financial records are approved.</p></article>
+          <article><span><ShieldCheck size={21} /></span><h3>Authentication and access</h3><p>Registration, sign-in, and protected APIs built around authenticated users and workspace roles.</p></article>
+          <article><span><Users size={21} /></span><h3>Teams and workspaces</h3><p>Keep organizations separate and give each workspace a clear membership boundary.</p></article>
+          <article><span><Layers3 size={21} /></span><h3>Plans and subscriptions</h3><p>Present configurable pricing and connect paid plans to Stripe Checkout and customer billing.</p></article>
         </div>
       </section>
 
-      <section className="landing-workflow" id="workflow">
-        <div><p>How it works</p><h2>One controlled workflow from upload to approval.</h2></div>
-        <ol><li><span>01</span><strong>Upload securely</strong><p>Store invoices, receipts, bills, and supporting images.</p></li><li><span>02</span><strong>Review extracted data</strong><p>Correct uncertain fields without losing the original result.</p></li><li><span>03</span><strong>Manage spending</strong><p>Create financial records only after the required review.</p></li></ol>
+      <section className="landing-workflow">
+        <div><p>Start with the basics</p><h2>Go from account to paid workspace.</h2></div>
+        <ol>
+          <li><span>01</span><strong>Create an account</strong><p>Register and set up your first workspace.</p></li>
+          <li><span>02</span><strong>Bring in your team</strong><p>Build your product on top of workspace membership.</p></li>
+          <li><span>03</span><strong>Choose a plan</strong><p>Let customers subscribe and manage billing securely.</p></li>
+        </ol>
       </section>
 
-      <section className="landing-pricing" id="pricing">
-        <div><ShieldCheck size={22} /><div><strong>Start with a workspace that fits</strong><p>Individual, freelancer, business, and accountant plans will be available as billing phases are implemented.</p></div></div>
-        <Button variant="secondary" onClick={() => onNavigate('/register')}>Create free account</Button>
+      <section className="pricing-section" id="pricing">
+        <div className="landing-section-heading"><p>Simple pricing</p><h2>Plans that grow with your product.</h2></div>
+        {error ? <p className="form-error" role="alert">Pricing is temporarily unavailable.</p> : null}
+        <div className="plan-grid">{plans.map((plan) => (
+          <article className="plan-card" key={plan.id}>
+            <h3>{plan.name}</h3><p>{plan.description}</p>
+            <strong>{formatPlanPrice(plan.monthlyPrice)}<small> / month</small></strong>
+            <ul><li><Check size={16} />Workspace access</li><li><Check size={16} />Account management</li><li><Check size={16} />Secure billing</li></ul>
+            <Button variant="secondary" onClick={() => onNavigate('/register')}>Get started</Button>
+          </article>
+        ))}</div>
       </section>
 
-      <footer className="landing-footer"><a className="landing-brand" href="/"><span className="brand-mark">M</span>Manage Invoice</a><p>AI document intelligence and expense management.</p></footer>
+      <footer className="landing-footer"><a className="landing-brand" href="/"><span className="brand-mark">S</span>SaaS Starter</a><p>A reusable foundation for your next SaaS.</p></footer>
     </main>
   )
 }

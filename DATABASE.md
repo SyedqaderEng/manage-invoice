@@ -2,23 +2,23 @@
 
 ## Runtime
 
-PostgreSQL 16 is the development database. Flyway applies versioned migrations at application startup.
+PostgreSQL 16 is the development database. Flyway applies versioned migrations at startup; Hibernate validates the resulting schema.
 
-## Local Services
+## Local service
 
-`compose.yml` starts PostgreSQL and Redis with the following defaults:
+`compose.yml` starts PostgreSQL. Values can be overridden with the same database variables used by the API:
 
-- Database: `manage_invoice`
-- User: `manage_invoice`
-- Password: `manage_invoice`
-- PostgreSQL port: `5432`
-- Redis port: `6379`
+- Database: `saas_starter`
+- User: `saas_starter`
+- Password: `saas_starter` (local development only)
+- Port: `5432`
 
-## Rules
+## SaaS data
 
-- UUID primary keys for tenant-owned data.
-- Explicit currency codes.
-- Decimal values, never floating point.
-- Foreign keys and tenant-scoped relationships.
-- No manual production schema changes.
-- Flyway is the only schema migration mechanism.
+- Users own workspace memberships.
+- Workspaces isolate team membership and subscription records.
+- `workspace_subscriptions` stores the Stripe customer/subscription identifiers and current plan state.
+- `processed_stripe_events` makes webhook handling idempotent.
+- UUIDs identify users, workspaces, and subscriptions.
+
+Flyway migrations V1-V8 are retained as immutable project history so existing databases remain migratable. V9 normalizes workspace roles/types and adds billing tables. The old application-specific tables are no longer used by the code; cleanup of those historical tables is intentionally not destructive.

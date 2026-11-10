@@ -1,7 +1,4 @@
-import {
-  BarChart3, FileText, FolderKanban, LayoutDashboard, ReceiptText,
-  Settings, Tags, Upload, Users, WalletCards
-} from 'lucide-react'
+import { CreditCard, LayoutDashboard, LogOut, Settings, Shield, Users } from 'lucide-react'
 
 interface Workspace {
   id: string
@@ -17,41 +14,40 @@ interface SidebarProps {
   mobileOpen: boolean
   onClose: () => void
   activeSection?: string
+  onNavigate: (section: string) => void
 }
 
-const primaryItems = [
-  { label: 'Overview', icon: LayoutDashboard, active: true },
-  { label: 'Documents', icon: FileText },
-  { label: 'Expenses', icon: ReceiptText },
-  { label: 'Invoices', icon: WalletCards },
-  { label: 'Vendors', icon: FolderKanban },
-  { label: 'Categories', icon: Tags },
-  { label: 'Reports', icon: BarChart3 },
-  { label: 'Exports', icon: Upload }
+const items = [
+  { label: 'Overview', section: 'overview', icon: LayoutDashboard },
+  { label: 'Team', section: 'team', icon: Users },
+  { label: 'Billing', section: 'billing', icon: CreditCard },
+  { label: 'Account', section: 'account', icon: Settings },
+  { label: 'Admin', section: 'admin', icon: Shield },
 ]
 
 export function Sidebar(props: SidebarProps) {
   return (
     <aside className={`sidebar ${props.mobileOpen ? 'mobile-open' : ''}`}>
-      <div className="brand"><span className="brand-mark">M</span><span>Manage Invoice</span></div>
+      <div className="brand"><span className="brand-mark">S</span><span>SaaS Starter</span></div>
       <label className="workspace-switcher">
         <span>Workspace</span>
-        <select value={props.activeWorkspaceId || ''} onChange={(event) => props.onWorkspaceChange(event.target.value)}>
+        <select value={props.activeWorkspaceId || ''} onChange={(event) => props.onWorkspaceChange(event.target.value)} aria-label="Select workspace">
           {props.workspaces.map((workspace) => <option key={workspace.id} value={workspace.id}>{workspace.name}</option>)}
         </select>
       </label>
       <nav className="sidebar-nav" aria-label="Primary navigation">
-        {primaryItems.map(({ label, icon: Icon, active }) => (
-          <a className={(props.activeSection === label.toLowerCase() || (!props.activeSection && label === 'Overview')) ? 'nav-item active' : 'nav-item'} href={label === 'Overview' ? '#' : `#${label.toLowerCase()}`} key={label} onClick={props.onClose}>
+        {items.map(({ label, section, icon: Icon }) => (
+          <button
+            className={`nav-item ${props.activeSection === section ? 'active' : ''}`}
+            key={section}
+            onClick={() => { props.onNavigate(section); props.onClose() }}
+          >
             <Icon size={18} aria-hidden="true" /><span>{label}</span>
-            {!active && label !== 'Overview' ? null : null}
-          </a>
+          </button>
         ))}
       </nav>
-      <nav className="sidebar-nav secondary-nav" aria-label="Workspace settings">
-        <a className="nav-item" href="#team"><Users size={18} />Team</a>
-        <a className="nav-item" href="#settings"><Settings size={18} />Settings</a>
-        <button className="nav-item nav-button" onClick={props.onLogout}>Sign out</button>
+      <nav className="sidebar-nav secondary-nav" aria-label="Account actions">
+        <button className="nav-item nav-button" onClick={props.onLogout}><LogOut size={18} />Sign out</button>
       </nav>
     </aside>
   )

@@ -1,79 +1,46 @@
 # REST API
 
-The API base path is `/api/v1`.
+The API base path is `/api/v1`. Authenticated endpoints require `Authorization: Bearer <JWT>`.
 
-## Phase 0 Endpoints
+## Health and documentation
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/api/v1/health` | Application REST health status |
-| GET | `/actuator/health` | Operational health status |
+| GET | `/api/v1/health` | Application health |
+| GET | `/actuator/health` | Operational health |
 | GET | `/api/v1/openapi` | OpenAPI document |
 | GET | `/api/v1/docs` | Swagger UI |
 
-## Phase 1 Endpoints
+## Identity
 
 | Method | Path | Purpose |
 |---|---|---|
 | POST | `/api/v1/auth/register` | Register a user and issue a JWT |
-| POST | `/api/v1/auth/login` | Authenticate a user and issue a JWT |
+| POST | `/api/v1/auth/login` | Authenticate and issue a JWT |
 | POST | `/api/v1/auth/logout` | Stateless logout acknowledgement |
-| GET | `/api/v1/auth/me` | Return the authenticated user |
-| GET | `/api/v1/workspaces` | List workspaces available to the authenticated user |
-| POST | `/api/v1/workspaces` | Create a workspace and owner membership |
-| GET | `/api/v1/workspaces/{workspaceId}/members` | List members after server-side membership authorization |
+| GET | `/api/v1/auth/me` | Read the authenticated account |
+| PATCH | `/api/v1/auth/me` | Update the account profile |
 
-Tenant APIs require `Authorization: Bearer <token>`. Workspace-specific resources must additionally resolve and authorize the selected workspace on the backend.
-
-## Phase 3 Endpoints
+## Workspaces and members
 
 | Method | Path | Purpose |
 |---|---|---|
-| POST | `/api/v1/documents` | Upload a supported document to the workspace in `X-Workspace-Id` |
-| GET | `/api/v1/documents` | List non-deleted workspace documents |
-| GET | `/api/v1/documents/{documentId}/download` | Download an authorized workspace document |
-| DELETE | `/api/v1/documents/{documentId}` | Soft-delete an authorized workspace document |
+| GET/POST | `/api/v1/workspaces` | List or create workspaces |
+| GET | `/api/v1/workspaces/{workspaceId}/members` | List members after membership authorization |
+| POST | `/api/v1/workspaces/{workspaceId}/members` | Add an existing account (owner/admin) |
+| PATCH | `/api/v1/workspaces/{workspaceId}/members/{memberId}` | Change a member role |
+| DELETE | `/api/v1/workspaces/{workspaceId}/members/{memberId}` | Remove a member |
 
-Uploads are validated from file signatures, not filename extensions. Duplicate SHA-256 checksums are rejected within the workspace. Files are stored through the private object-storage abstraction; callers receive metadata only.
+Only owners can grant or revoke administrator access. Ownership cannot be changed through member management. Membership and role checks are performed by the API, not trusted from the UI.
 
-## Phase 4 Endpoints
-
-| Method | Path | Purpose |
-|---|---|---|
-| GET | `/api/v1/documents/{documentId}/processing-status` | Return document and processing job status |
-| GET | `/api/v1/documents/{documentId}/extraction` | Return the latest normalized extraction |
-| POST | `/api/v1/documents/{documentId}/reprocess` | Queue authorized document reprocessing |
-
-All document processing endpoints require the authenticated user, `X-Workspace-Id`, and workspace membership. OCR uses the configured provider abstraction; extraction confidence below review thresholds routes documents to review-required status.
-
-## Phase 5 Endpoints
+## Billing
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/api/v1/documents/{documentId}/review` | Return original and corrected review state |
-| POST | `/api/v1/documents/{documentId}/review/save` | Save a reviewer draft |
-| POST | `/api/v1/documents/{documentId}/review/approve` | Approve corrected extraction data |
-| POST | `/api/v1/documents/{documentId}/review/reject` | Record rejection with optional notes |
+| GET | `/api/v1/billing/plans` | Public plan information |
+| GET | `/api/v1/billing/workspaces/{workspaceId}` | Read the authorized workspace subscription |
+| POST | `/api/v1/billing/workspaces/{workspaceId}/checkout` | Create Stripe Checkout session (owner/admin) |
+| POST | `/api/v1/billing/workspaces/{workspaceId}/portal` | Create Stripe customer portal session (owner/admin) |
+| POST | `/api/v1/billing/webhook` | Receive verified Stripe subscription events |
 
-Review actions preserve original extraction data separately from corrections. Approval changes review state only; Phase 6 owns creation of expense and invoice records. Viewers may read review state but cannot save, approve, or reject.
-
-## Phase 6 Endpoints
-
-| Method | Path | Purpose |
-|---|---|---|
-| GET/POST | `/api/v1/expenses` | List or create workspace expenses |
-| DELETE | `/api/v1/expenses/{expenseId}` | Delete an authorized workspace expense |
-| GET/POST | `/api/v1/invoices` | List or create workspace invoices |
-| POST | `/api/v1/invoices/{invoiceId}/payments` | Record an invoice payment |
-| GET/POST | `/api/v1/vendors` | List or create vendors |
-| GET/POST | `/api/v1/categories` | List or create categories |
-
-All endpoints require authentication and `X-Workspace-Id`. Invoice payment totals are recalculated server-side, payment currency must match the invoice currency, and payments cannot exceed the invoice total.
-
-Invoice, vendor, category, and expense detail/update/delete routes are workspace-scoped. Duplicate vendor names and invoice/vendor number pairs are rejected within the workspace.
-
-| Method | Path | Purpose |
-|---|---|---|
-| GET/POST | `/api/v1/document-relationships` | List or explicitly create document relationships |
-
-Domain controllers must delegate business operations to backend services. The React application must treat these endpoints as its server contract.
+Stripe webhook events are signature-verified and deduplicated by event ID. Checkout and portal URLs are returned by the API and are never constructed by the frontend.

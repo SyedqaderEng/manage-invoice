@@ -1,17 +1,19 @@
 # Architecture
 
-Manage Invoice uses a modular monolith architecture.
+The starter is a modular monolith with a React client and Spring Boot REST API.
 
 ## Backend
 
-The Spring Boot API owns all authentication, authorization, validation, domain rules, persistence, and financial calculations. The backend is organized by product modules under `com.manageinvoice`.
-
-All browser-facing operations use REST endpoints under `/api/v1`. Controllers remain thin; controllers delegate workflows to services.
+The API owns authentication, authorization, tenant boundaries, validation, subscription state, and persistence. Controllers delegate to services. PostgreSQL is the source of truth; Flyway owns schema changes.
 
 ## Frontend
 
-React and TypeScript provide the application shell and call backend REST APIs. React components contain presentation and interaction state, not financial business rules.
+React and TypeScript provide the public landing/pricing experience and authenticated workspace shell. The browser calls REST endpoints under `/api/v1`; authorization decisions and subscription updates remain server-side.
 
-## Infrastructure
+## Tenancy
 
-PostgreSQL is the source of truth. Flyway owns schema changes. Redis supports asynchronous coordination. Private object storage and background processing will be added in their dedicated phases.
+Workspaces provide the tenant boundary. Membership is checked for each workspace-scoped operation. Owners and admins can manage members and subscriptions; owners alone can grant administrator access.
+
+## Billing
+
+The backend creates Stripe Checkout and customer portal sessions. A signed Stripe webhook is the source of truth for subscription state, with event IDs persisted to prevent duplicate processing.

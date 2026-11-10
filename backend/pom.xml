@@ -11,10 +11,10 @@
     <relativePath/>
   </parent>
 
-  <groupId>com.manageinvoice</groupId>
-  <artifactId>manage-invoice-api</artifactId>
+  <groupId>com.saasstarter</groupId>
+  <artifactId>saas-starter-api</artifactId>
   <version>0.1.0-SNAPSHOT</version>
-  <name>Manage Invoice API</name>
+  <name>SaaS Starter API</name>
 
   <properties>
     <java.version>21</java.version>
@@ -58,10 +58,6 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-redis</artifactId>
     </dependency>
     <dependency>
       <groupId>org.postgresql</groupId>
