@@ -1,17 +1,12 @@
-import { FormEvent, useEffect, useState } from 'react'
-import { Plus } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { ArrowUpRight, FileImage, FileText, Plus, Search, Sparkles } from 'lucide-react'
 import { AuthScreen } from './features/auth/AuthScreen'
 import { Sidebar } from './components/navigation/Sidebar'
 import { TopBar } from './components/navigation/TopBar'
 import { Button } from './components/ui/Button'
 import { LandingPage } from './features/landing/LandingPage'
-import { formatPlanPrice } from './features/billing/pricing'
 
 interface User { id: string; email: string; firstName: string; lastName: string }
-interface Workspace { id: string; name: string; workspaceType: string; role: string }
-interface Member { id: string; email: string; role: string }
-interface Plan { id: string; name: string; description: string; monthlyPrice: number; yearlyPrice: number }
-interface Subscription { status: string; plan: string; currentPeriodEnd?: string }
 interface AuthResponse { accessToken: string; user: User }
 
 const api = async <T,>(path: string, options: RequestInit = {}, token?: string): Promise<T> => {
@@ -28,107 +23,63 @@ const api = async <T,>(path: string, options: RequestInit = {}, token?: string):
 type Api = typeof api
 
 export function App() {
-  const [token, setToken] = useState(() => localStorage.getItem('saasStarterToken') || '')
+  const [token, setToken] = useState(() => localStorage.getItem('ledgerlyToken') || '')
   const [user, setUser] = useState<User | null>(null)
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([])
-  const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(() => {
-    const saved = localStorage.getItem('saasStarterWorkspace')
-    return saved ? JSON.parse(saved) as Workspace : null
-  })
-  const [workspaceName, setWorkspaceName] = useState('')
   const [error, setError] = useState('')
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [section, setSection] = useState(() => window.location.hash.slice(1) || 'overview')
+  const [section, setSection] = useState('dashboard')
   const [pathname, setPathname] = useState(() => window.location.pathname)
 
   const navigate = (path: string) => {
     window.history.pushState({}, '', path)
     setPathname(window.location.pathname)
-    setSection(window.location.hash.slice(1) || 'overview')
+    setSection(window.location.hash.slice(1) || 'dashboard')
   }
 
   useEffect(() => {
     const onPopState = () => {
       setPathname(window.location.pathname)
-      setSection(window.location.hash.slice(1) || 'overview')
+      setSection(window.location.hash.slice(1) || 'dashboard')
     }
     window.addEventListener('popstate', onPopState)
     return () => window.removeEventListener('popstate', onPopState)
   }, [])
 
   useEffect(() => {
-    const onHashChange = () => setSection(window.location.hash.slice(1) || 'overview')
-    window.addEventListener('hashchange', onHashChange)
-    return () => window.removeEventListener('hashchange', onHashChange)
-  }, [])
-
-  useEffect(() => {
     if (!token) return
-    api<User>('/api/v1/auth/me', {}, token).then(setUser).catch(() => logout())
-    api<Workspace[]>('/api/v1/workspaces', {}, token).then((items) => {
-      setWorkspaces(items)
-      const saved = items.find((item) => item.id === activeWorkspace?.id)
-      if (saved) setActiveWorkspace(saved)
-      else if (items.length) setActiveWorkspace(items[0])
-      else setActiveWorkspace(null)
-    }).catch((reason: Error) => setError(reason.message))
+    api<User>('/api/v1/auth/me', {}, token)
+      .then(setUser)
+      .catch(() => logout())
   }, [token])
 
   useEffect(() => {
-    if (token && ['/', '/login', '/register', '/pricing'].includes(pathname)) navigate('/app')
+    if (token && ['/', '/login', '/register'].includes(pathname)) navigate('/app')
   }, [token, pathname])
 
-  useEffect(() => {
-    if (activeWorkspace) localStorage.setItem('saasStarterWorkspace', JSON.stringify(activeWorkspace))
-    else localStorage.removeItem('saasStarterWorkspace')
-  }, [activeWorkspace])
-
   const authenticated = (response: AuthResponse) => {
-    localStorage.setItem('saasStarterToken', response.accessToken)
+    localStorage.setItem('ledgerlyToken', response.accessToken)
     setToken(response.accessToken)
     setUser(response.user)
     navigate('/app')
   }
 
   function logout() {
-    localStorage.removeItem('saasStarterToken')
-    localStorage.removeItem('saasStarterWorkspace')
+    localStorage.removeItem('ledgerlyToken')
     setToken('')
     setUser(null)
-    setWorkspaces([])
-    setActiveWorkspace(null)
     navigate('/')
-  }
-
-  const createWorkspace = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setError('')
-    try {
-      const workspace = await api<Workspace>('/api/v1/workspaces', {
-        method: 'POST',
-        body: JSON.stringify({ name: workspaceName, workspaceType: 'ORGANIZATION' }),
-      }, token)
-      setWorkspaces((items) => [...items, workspace])
-      setActiveWorkspace(workspace)
-      setWorkspaceName('')
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Unable to create workspace')
-    }
   }
 
   if (!token && (pathname === '/login' || pathname === '/register')) {
     return <AuthScreen api={api} onAuthenticated={authenticated} initialMode={pathname === '/register' ? 'register' : 'login'} onNavigate={navigate} />
   }
-  if (!token) return <LandingPage onNavigate={navigate} api={api} />
+  if (!token) return <LandingPage onNavigate={navigate} />
 
-  const userName = user ? `${user.firstName} ${user.lastName}` : 'Account'
+  const userName = user ? `${user.firstName} ${user.lastName}` : 'Your account'
   return (
     <div className="app-shell">
       {mobileOpen ? <button className="sidebar-backdrop" aria-label="Close navigation" onClick={() => setMobileOpen(false)} /> : null}
       <Sidebar
-        workspaces={workspaces}
-        activeWorkspaceId={activeWorkspace?.id}
-        onWorkspaceChange={(id) => setActiveWorkspace(workspaces.find((item) => item.id === id) || null)}
         onLogout={logout}
         mobileOpen={mobileOpen}
         onClose={() => setMobileOpen(false)}
@@ -136,39 +87,42 @@ export function App() {
         onNavigate={(target) => navigate(`/app#${target}`)}
       />
       <div className="main-column">
-        <TopBar userName={userName} workspaceName={activeWorkspace?.name || 'No workspace'} onMenu={() => setMobileOpen(true)} />
-        <main className="page-content">
+        <TopBar userName={userName} onMenu={() => setMobileOpen(true)} />
+        <main className="page-content dashboard-content">
           {error ? <p className="form-error" role="alert">{error}</p> : null}
-          {section === 'account' ? (
+          {section === 'settings' ? (
             <AccountSettings user={user} token={token} api={api} onSaved={setUser} />
-          ) : section === 'team' || section === 'admin' ? (
-            <WorkspaceAdmin workspace={activeWorkspace} token={token} api={api} />
-          ) : section === 'billing' ? (
-            <BillingSettings workspace={activeWorkspace} token={token} api={api} />
+          ) : section === 'documents' ? (
+            <section className="empty-page-card"><span className="dashboard-icon"><FileText size={22} /></span><p className="section-kicker">YOUR LIBRARY</p><h1>Your personal library.</h1><p>Your receipt and invoice history will live here, connected to the original documents.</p><Button onClick={() => navigate('/app#dashboard')}>Back to overview</Button></section>
           ) : (
-            <>
-              <div className="page-heading"><div><p>Workspace</p><h1>{activeWorkspace ? `Welcome, ${user?.firstName || 'there'}` : 'Set up your workspace'}</h1></div></div>
-              {!activeWorkspace ? (
-                <section className="workspace-empty">
-                  <h2>Create your first workspace</h2>
-                  <p>Workspaces keep your organization and its members together.</p>
-                  <form onSubmit={createWorkspace} className="inline-create">
-                    <input aria-label="Workspace name" value={workspaceName} onChange={(event) => setWorkspaceName(event.target.value)} placeholder="Workspace name" required />
-                    <Button type="submit" icon={<Plus size={18} />}>Create workspace</Button>
-                  </form>
-                </section>
-              ) : (
-                <section className="summary-grid" aria-label="Workspace overview">
-                  <article className="summary-panel"><span>Workspace</span><strong>{activeWorkspace.name}</strong></article>
-                  <article className="summary-panel"><span>Your role</span><strong>{activeWorkspace.role}</strong></article>
-                  <article className="summary-panel"><span>Plan</span><strong><a href="/app#billing" onClick={(event) => { event.preventDefault(); navigate('/app#billing') }}>Manage billing</a></strong></article>
-                </section>
-              )}
-            </>
+            <Dashboard user={user} onNavigate={navigate} />
           )}
         </main>
       </div>
     </div>
+  )
+}
+
+function Dashboard({ user, onNavigate }: { user: User | null; onNavigate: (path: string) => void }) {
+  const firstName = user?.firstName || 'there'
+  return (
+    <>
+      <div className="dashboard-heading">
+        <div><p className="section-kicker">YOUR PERSONAL FINANCE SPACE</p><h1>A clearer picture, {firstName}.</h1><p className="dashboard-subtitle">Your receipts and invoices, organized around your life.</p></div>
+        <Button onClick={() => onNavigate('/app#documents')}><Plus size={17} /> Open document library</Button>
+      </div>
+      <section className="dashboard-welcome">
+        <div className="welcome-copy"><span className="welcome-label"><Sparkles size={14} /> A FRESH START</span><h2>Make your paperwork<br />work a little less.</h2><p>Bring your receipts and invoices together. Keep the original close, find what you need, and see your spending more clearly.</p><Button onClick={() => onNavigate('/app#documents')}>Open your library <ArrowUpRight size={16} /></Button></div>
+        <div className="welcome-art" aria-hidden="true"><div className="art-glow" /><div className="art-sheet sheet-back"><span /><span /><span /></div><div className="art-sheet sheet-front"><span className="art-receipt-icon"><FileImage size={20} /></span><span className="art-line" /><span className="art-line short" /><span className="art-line" /><span className="art-total"><i /> <b /></span></div><div className="art-sparkle sparkle-a">✳</div><div className="art-sparkle sparkle-b">✦</div><div className="art-sticker">YOUR<br />RECORDS,<br /><strong>IN FOCUS</strong></div></div>
+      </section>
+      <section className="dashboard-section-heading"><div><p className="section-kicker">WHEN YOU’RE READY</p><h2>Your overview will grow with you.</h2></div><button className="text-link" onClick={() => onNavigate('/app#documents')}>Your documents <ArrowUpRight size={15} /></button></section>
+      <section className="dashboard-empty-grid">
+        <article className="empty-data-card"><div className="empty-data-top"><span className="small-icon blue"><Search size={17} /></span><span>SEARCH YOUR RECORDS</span></div><div className="empty-data-illustration"><div className="search-orb"><Search size={24} /></div><i /><i /><i /></div><h3>Find it when you need it.</h3><p>Your documents will be searchable by vendor, item, date, and amount.</p></article>
+        <article className="empty-data-card"><div className="empty-data-top"><span className="small-icon violet"><Sparkles size={17} /></span><span>SEE THE BIGGER PICTURE</span></div><div className="empty-data-illustration chart-illustration"><i /><i /><i /><i /><i /><i /><i /></div><h3>Understand where it goes.</h3><p>Once you have records, your spending trends and categories will take shape here.</p></article>
+        <article className="empty-data-card"><div className="empty-data-top"><span className="small-icon peach"><FileText size={17} /></span><span>KEEP THE DETAILS</span></div><div className="empty-data-illustration document-illustration"><span><FileText size={20} /></span><i /><i /><b /></div><h3>Originals stay connected.</h3><p>Keep source documents close to the details you’ve reviewed and saved.</p></article>
+      </section>
+      <p className="dashboard-privacy"><span><Sparkles size={14} /></span> A personal space, just for your records. Your information stays yours.</p>
+    </>
   )
 }
 
@@ -180,7 +134,7 @@ function AccountSettings({ user, token, api, onSaved }: {
 }) {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
-  const save = async (event: FormEvent<HTMLFormElement>) => {
+  const save = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const form = new FormData(event.currentTarget)
     setError('')
@@ -191,166 +145,22 @@ function AccountSettings({ user, token, api, onSaved }: {
         body: JSON.stringify({ firstName: form.get('firstName'), lastName: form.get('lastName') }),
       }, token)
       onSaved(updated)
-      setMessage('Account settings saved.')
+      setMessage('Your profile has been saved.')
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Unable to save settings')
     }
   }
   return (
     <section className="settings-card">
-      <div className="page-heading"><div><p>Account</p><h1>Profile settings</h1></div></div>
+      <div className="page-heading"><div><p className="section-kicker">YOUR ACCOUNT</p><h1>Profile settings</h1></div></div>
       <form className="settings-form" onSubmit={save}>
         <label className="field">Email address<input value={user?.email || ''} readOnly /></label>
         <label className="field">First name<input name="firstName" defaultValue={user?.firstName || ''} required /></label>
         <label className="field">Last name<input name="lastName" defaultValue={user?.lastName || ''} required /></label>
         {error ? <p className="form-error" role="alert">{error}</p> : null}
-        {message ? <p role="status">{message}</p> : null}
+        {message ? <p className="form-success" role="status">{message}</p> : null}
         <Button type="submit">Save changes</Button>
       </form>
-    </section>
-  )
-}
-
-function WorkspaceAdmin({ workspace, token, api }: {
-  workspace: Workspace | null
-  token: string
-  api: Api
-}) {
-  const [members, setMembers] = useState<Member[]>([])
-  const [error, setError] = useState('')
-  const [email, setEmail] = useState('')
-  const [saving, setSaving] = useState(false)
-  const reload = () => {
-    if (!workspace) return
-    api<Member[]>(`/api/v1/workspaces/${workspace.id}/members`, {}, token)
-      .then(setMembers).catch((reason: Error) => setError(reason.message))
-  }
-  useEffect(() => {
-    reload()
-  }, [workspace?.id])
-  const addMember = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (!workspace) return
-    setSaving(true)
-    setError('')
-    try {
-      await api(`/api/v1/workspaces/${workspace.id}/members`, {
-        method: 'POST',
-        body: JSON.stringify({ email, role: 'MEMBER' }),
-      }, token)
-      setEmail('')
-      reload()
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Unable to add member')
-    } finally {
-      setSaving(false)
-    }
-  }
-  const updateRole = async (memberId: string, role: string) => {
-    if (!workspace) return
-    setError('')
-    try {
-      await api(`/api/v1/workspaces/${workspace.id}/members/${memberId}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ role }),
-      }, token)
-      reload()
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Unable to update role')
-    }
-  }
-  const removeMember = async (memberId: string) => {
-    if (!workspace) return
-    setError('')
-    try {
-      await api(`/api/v1/workspaces/${workspace.id}/members/${memberId}`, { method: 'DELETE' }, token)
-      reload()
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Unable to remove member')
-    }
-  }
-  return (
-    <section className="settings-card">
-      <div className="page-heading"><div><p>Workspace administration</p><h1>{workspace?.name || 'Workspace'}</h1></div></div>
-      <p className="settings-copy">Add existing accounts and manage workspace roles. Workspace ownership and administrator permissions are enforced by the API.</p>
-      {error ? <p className="form-error" role="alert">{error}</p> : null}
-      {workspace && ['OWNER', 'ADMIN'].includes(workspace.role) ? (
-        <form className="inline-create" onSubmit={addMember}>
-          <input type="email" aria-label="Existing account email" placeholder="Existing account email" value={email} onChange={(event) => setEmail(event.target.value)} required />
-          <Button type="submit" disabled={saving}>Add member</Button>
-        </form>
-      ) : null}
-      <div className="member-list">{members.map((member) => (
-        <div className="member-row" key={member.id}>
-          <span>{member.email}</span>
-          {member.role === 'OWNER' ? <strong>Owner</strong> : (
-            <div className="member-controls">
-              <select aria-label={`Role for ${member.email}`} value={member.role} onChange={(event) => updateRole(member.id, event.target.value)}>
-                <option value="MEMBER">Member</option><option value="ADMIN">Admin</option>
-              </select>
-              <button type="button" className="text-button" onClick={() => removeMember(member.id)}>Remove</button>
-            </div>
-          )}
-        </div>
-      ))}</div>
-      {!workspace ? <p>Create a workspace to manage its team.</p> : null}
-    </section>
-  )
-}
-
-function BillingSettings({ workspace, token, api }: {
-  workspace: Workspace | null
-  token: string
-  api: Api
-}) {
-  const [plans, setPlans] = useState<Plan[]>([])
-  const [subscription, setSubscription] = useState<Subscription | null>(null)
-  const [interval, setInterval] = useState<'monthly' | 'yearly'>('monthly')
-  const [error, setError] = useState('')
-  useEffect(() => {
-    api<Plan[]>('/api/v1/billing/plans').then(setPlans).catch((reason: Error) => setError(reason.message))
-    if (workspace) api<Subscription>(`/api/v1/billing/workspaces/${workspace.id}`, {}, token)
-      .then(setSubscription).catch(() => setSubscription(null))
-  }, [workspace?.id])
-  const startCheckout = async (planId: string) => {
-    if (!workspace) return
-    setError('')
-    try {
-      const result = await api<{ url: string }>(`/api/v1/billing/workspaces/${workspace.id}/checkout`, {
-        method: 'POST',
-        body: JSON.stringify({ planId, interval }),
-      }, token)
-      window.location.assign(result.url)
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Unable to start checkout')
-    }
-  }
-  const openPortal = async () => {
-    if (!workspace) return
-    try {
-      const result = await api<{ url: string }>(`/api/v1/billing/workspaces/${workspace.id}/portal`, { method: 'POST' }, token)
-      window.location.assign(result.url)
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Unable to open billing portal')
-    }
-  }
-  return (
-    <section className="settings-card">
-      <div className="page-heading"><div><p>Subscription</p><h1>Plans and billing</h1></div></div>
-      <p className="settings-copy">{subscription ? `Current subscription: ${subscription.plan} (${subscription.status}).` : 'Choose a plan for your workspace.'}</p>
-      <div className="billing-interval" role="group" aria-label="Billing interval">
-        <button className={interval === 'monthly' ? 'selected' : ''} onClick={() => setInterval('monthly')}>Monthly</button>
-        <button className={interval === 'yearly' ? 'selected' : ''} onClick={() => setInterval('yearly')}>Yearly</button>
-      </div>
-      {error ? <p className="form-error" role="alert">{error}</p> : null}
-      <div className="plan-grid">{plans.map((plan) => (
-        <article className="plan-card" key={plan.id}>
-          <h2>{plan.name}</h2><p>{plan.description}</p>
-          <strong>{formatPlanPrice(interval === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice)}<small> / {interval === 'monthly' ? 'month' : 'year'}</small></strong>
-          <Button disabled={!workspace} onClick={() => startCheckout(plan.id)}>Choose {plan.name}</Button>
-        </article>
-      ))}</div>
-      {subscription ? <Button variant="secondary" onClick={openPortal}>Manage subscription</Button> : null}
     </section>
   )
 }

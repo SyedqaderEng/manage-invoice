@@ -39,8 +39,8 @@ export function AuthScreen({ onAuthenticated, api, initialMode, onNavigate }: Au
   return (
     <main className="auth-layout">
       <section className="auth-brand-panel">
-        <button className="auth-brand" type="button" onClick={() => onNavigate('/')}><span className="brand-mark light">S</span><strong>SaaS Starter</strong></button>
-        <blockquote>A secure foundation for your next SaaS product.</blockquote>
+        <button className="auth-brand" type="button" onClick={() => onNavigate('/')}><span className="brand-mark light">L</span><strong>Ledgerly</strong></button>
+        <blockquote>Every receipt, right where you need it.</blockquote>
       </section>
       <section className="auth-panel">
         <div className="auth-form-wrap">
@@ -48,8 +48,8 @@ export function AuthScreen({ onAuthenticated, api, initialMode, onNavigate }: Au
             <button className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')} type="button">Sign in</button>
             <button className={mode === 'register' ? 'active' : ''} onClick={() => setMode('register')} type="button">Create account</button>
           </div>
-          <h1>{mode === 'login' ? 'Welcome back' : 'Create your workspace account'}</h1>
-          <p className="auth-description">{mode === 'login' ? 'Sign in to continue to your workspace.' : 'Create an account to get started.'}</p>
+          <h1>{mode === 'login' ? 'Welcome back' : 'A clearer start.'}</h1>
+          <p className="auth-description">{mode === 'login' ? 'Sign in to your personal finance space.' : 'Create your free personal account.'}</p>
           <form className="auth-form" onSubmit={submit}>
             {mode === 'register' ? (
               <div className="two-column-fields">

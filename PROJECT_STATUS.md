@@ -1,22 +1,31 @@
-# SaaS Starter Status
+# Ledgerly Project Status
 
-## Included foundations
+The implementation follows `mange-invoice-new-plan.txt` phase by phase. This status distinguishes completed work from future functionality.
 
-- Spring Boot REST API with JWT registration, login, logout, and authenticated profile management.
-- PostgreSQL/Flyway persistence and workspace membership isolation.
-- Workspace creation, switching, membership management, and owner/admin/member roles.
-- Responsive React app shell, public landing/pricing, profile settings, team admin, and billing views.
-- Stripe Checkout, customer portal, signed webhook verification, and idempotent event handling.
+## Phase 1 — Product UI and Design Foundation
 
-## Configuration required
+Implemented:
 
-- `JWT_SECRET` must be a random value of at least 32 bytes.
-- Configure Stripe API and webhook secrets plus the recurring price IDs for Starter, Pro, and Team.
-- Edit the sample plans/prices in `backend/src/main/java/com/saasstarter/billing/BillingService.java` to match product configuration.
+- Product-branded landing page with responsive navigation, receipt-to-record illustration, how-it-works, document types, pricing, FAQ, and final CTA.
+- Registration and sign-in screens wired to existing authentication endpoints.
+- Personal dashboard shell and profile editing screen.
+- Responsive personal navigation, mobile drawer, accessible focus styles, and reduced-motion behavior.
+- Empty states that do not show fabricated customer metrics.
+- Shared visual design system and basic price-formatting test.
 
-## Current limitations
+Validation:
 
-- Team management can add an account that already exists; invitation email delivery is not configured.
-- The displayed price values and plan copy are starter defaults, not a commercial recommendation.
-- Password reset and email verification are not included.
-- Historical invoice/document Flyway migrations remain for database compatibility, but application code for those domains is removed.
+- Frontend tests pass.
+- TypeScript check and production build pass.
+- Landing page opened and visually inspected at desktop size.
+
+## Remaining phases
+
+- **Phase 2:** individual-account data ownership, private uploads, original-document viewing, document history, vendors, and categories.
+- **Phase 3:** OCR/AI extraction, confidence and accuracy handling, review, correction, and confirmation.
+- **Phase 4:** real-data expenses, analytics, search, filters, and reports.
+- **Phase 5:** CSV/XML/PDF exports and original-document downloads.
+- **Phase 6:** Free/Pro account subscriptions, Stripe lifecycle, configurable usage limits, and billing history.
+- **Phase 7:** end-to-end, security, responsive, performance, and production readiness.
+
+The existing backend still contains SaaS workspace/member APIs and workspace-based Stripe code. They are not yet adapted to the specification's individual-account model and must not be considered product-complete. Historical Flyway migrations will be preserved and evolved with forward-only migrations.
